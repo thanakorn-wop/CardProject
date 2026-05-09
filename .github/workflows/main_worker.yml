@@ -2,14 +2,15 @@ name: Automation Worker
 
 on:
   schedule:
-    # รันทุก 5 นาที (ความถี่สูงสุดที่ GitHub อนุญาต)
-    # เวลาในนี้เป็น UTC (เวลาไทยลบด้วย 7 ชม.)
-    - cron: '*/5 * * * *'
-  workflow_dispatch: # ปุ่มกดรันเองได้จากหน้าเว็บ GitHub (เผื่ออยากทดสอบ)
+    - cron: '*/5 * * * *' # รันทุก 5 นาที
+  workflow_dispatch:      # กดรันเองได้
 
 jobs:
   run-script:
     runs-on: ubuntu-latest
+    # เพิ่มสิทธิ์ให้ GitHub Actions สามารถเขียนไฟล์ (Write) กลับเข้า Repo ได้
+    permissions:
+      contents: write
     
     steps:
       - name: Checkout Code
@@ -23,19 +24,19 @@ jobs:
       - name: Install Dependencies
         run: |
           python -m pip install --upgrade pip
-          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          # แก้ไข Path ให้ไปที่โฟลเดอร์ Config
+          if [ -f Config/requirements.txt ]; then pip install -r Config/requirements.txt; fi
 
       - name: Run Python Script
-        run: python api.py
-        env:
-          # หากโค้ดต้องใช้ API Key ให้ใส่ไว้ใน GitHub Secrets
-          API_KEY: ${{ secrets.MY_API_KEY }}
-
+        run: |
+          # สั่งให้รันไฟล์ api.py ที่อยู่ในโฟลเดอร์ Backend
+          python Backend/api.py
+          
       - name: Commit and Push changes
-        # หากสคริปต์มีการบันทึกไฟล์ภาพหรือข้อมูล และต้องการให้มันเซฟกลับเข้า Repo
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          # บันทึกการเปลี่ยนแปลงทั้งหมด (รวมถึงรูปภาพใหม่ๆ ถ้ามี)
           git add .
           git commit -m "Auto update data: $(date)" || echo "No changes to commit"
-          git push      
+          git push origin main      
