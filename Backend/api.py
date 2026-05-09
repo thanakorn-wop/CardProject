@@ -4,7 +4,7 @@ import os
 base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # ชี้ไปที่ไฟล์ในโฟลเดอร์ Config
-config_path = os.path.join(base_dir, "Config", "settings.txt")
+config_path = os.path.join(base_dir, "Config", "requirements.txt")
 
 # ลองเปิดอ่านไฟล์
 try:
